@@ -12,15 +12,21 @@ import {
 } from '@ant-design/icons';
 import { storageService } from '../utils/storage';
 
-const { Sider } = Layout;
-
 interface SidebarProps {
   selectedKey: string;
   onMenuClick: (key: string) => void;
   onLogout: () => void;
+  collapsed?: boolean;
+  isMobile?: boolean;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ selectedKey, onMenuClick, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ 
+  selectedKey, 
+  onMenuClick, 
+  onLogout, 
+  collapsed = false,
+  isMobile = false
+}) => {
   const currentUser = storageService.getCurrentUser();
   
   const menuItems = [
@@ -66,49 +72,71 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedKey, onMenuClick, onLogout })
   ];
 
   return (
-    <Sider 
-      width={250} 
-      style={{ 
-        background: '#fff', 
-        borderRight: '1px solid #f0f0f0',
-        boxShadow: '2px 0 8px rgba(0,0,0,0.1)'
-      }}
-    >
-      <div style={{ 
-        padding: '16px', 
-        borderBottom: '1px solid #f0f0f0',
-        textAlign: 'center'
-      }}>
-        <Dropdown
-          menu={{ items: userMenuItems }}
-          placement="bottomRight"
-          trigger={['click']}
-        >
-          <Button 
-            type="text" 
-            style={{ 
-              width: '100%', 
-              height: 'auto', 
-              padding: '8px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}
+    <div style={{ 
+      height: '100%', 
+      background: '#fff', 
+      borderRight: '1px solid #f0f0f0',
+      boxShadow: '2px 0 8px rgba(0,0,0,0.1)',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      {!collapsed && (
+        <div style={{ 
+          padding: '16px', 
+          borderBottom: '1px solid #f0f0f0',
+          textAlign: 'center'
+        }}>
+          <Dropdown
+            menu={{ items: userMenuItems }}
+            placement="bottomRight"
+            trigger={['click']}
+          >
+            <Button 
+              type="text" 
+              style={{ 
+                width: '100%', 
+                height: 'auto', 
+                padding: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}
+            >
+              <Avatar 
+                size={40} 
+                icon={<UserOutlined />} 
+                style={{ marginBottom: '8px' }}
+              />
+              <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                {currentUser?.username || '用户'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#666' }}>
+                {currentUser?.email || ''}
+              </div>
+            </Button>
+          </Dropdown>
+        </div>
+      )}
+      
+      {collapsed && (
+        <div style={{ 
+          padding: '16px 8px', 
+          borderBottom: '1px solid #f0f0f0',
+          textAlign: 'center'
+        }}>
+          <Dropdown
+            menu={{ items: userMenuItems }}
+            placement="bottomRight"
+            trigger={['click']}
           >
             <Avatar 
-              size={40} 
+              size={32} 
               icon={<UserOutlined />} 
-              style={{ marginBottom: '8px' }}
+              style={{ cursor: 'pointer' }}
             />
-            <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
-              {currentUser?.username || '用户'}
-            </div>
-            <div style={{ fontSize: '12px', color: '#666' }}>
-              {currentUser?.email || ''}
-            </div>
-          </Button>
-        </Dropdown>
-      </div>
+          </Dropdown>
+        </div>
+      )}
       
       <Menu
         mode="inline"
@@ -118,10 +146,12 @@ const Sidebar: React.FC<SidebarProps> = ({ selectedKey, onMenuClick, onLogout })
         style={{ 
           height: 'calc(100% - 120px)', 
           borderRight: 0,
-          paddingTop: '16px'
+          paddingTop: '16px',
+          flex: 1
         }}
+        inlineCollapsed={collapsed}
       />
-    </Sider>
+    </div>
   );
 };
 
