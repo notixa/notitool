@@ -1,8 +1,8 @@
-# TodoList 文档管理系统 - iFlow 上下文文档
+# NotiTool - 个人效率工具集合 - iFlow 上下文文档
 
 ## 项目概述
 
-这是一个现代化的个人TodoList应用，集成了强大的文档管理、笔记功能和用户认证系统。项目基于 React 18 + TypeScript 构建，使用 Ant Design 作为 UI 组件库，Vite 作为构建工具，并支持 Electron 跨平台桌面应用。专为个人使用设计，每个用户拥有独立的数据空间。
+NotiTool 是一个现代化的个人效率工具集合，集成网站导航、待办事项管理、文档管理、笔记功能和用户认证系统。项目基于 React 18 + TypeScript 构建，使用 Ant Design 作为 UI 组件库，Vite 作为构建工具，并支持 Electron 跨平台桌面应用。专为个人使用设计，每个用户拥有独立的数据空间。
 
 ## 技术栈
 
@@ -12,7 +12,9 @@
 - **状态管理**: 本地存储（LocalStorage）
 - **桌面应用**: Electron
 - **Markdown渲染**: react-markdown + remark-gfm
+- **拖拽功能**: @dnd-kit/core + @dnd-kit/sortable + @dnd-kit/utilities
 - **样式方案**: CSS + Ant Design 主题系统
+- **部署平台**: Vercel
 
 ## 项目架构
 
@@ -27,13 +29,18 @@ src/
 │   ├── DocumentReader.tsx  # 文档阅读器组件
 │   ├── Notes.tsx       # 笔记管理组件（支持Markdown）
 │   ├── Statistics.tsx  # 统计分析组件
-│   └── Login.tsx       # 用户认证组件
+│   ├── Login.tsx       # 用户认证组件
+│   └── WebsiteNavigation.tsx # 网站导航组件（支持拖拽排序）
 ├── utils/              # 工具函数目录
 │   └── storage.ts      # 多用户本地存储服务
 ├── App.tsx             # 主应用组件
 ├── App.css             # 应用全局样式
 ├── main.tsx           # 应用入口文件
 └── vite-env.d.ts      # Vite 类型声明
+
+electron/               # Electron 桌面应用
+├── main.js            # Electron 主进程
+└── preload.js         # 预加载脚本
 ```
 
 ### 应用架构模式
@@ -42,6 +49,7 @@ src/
 - **多用户数据隔离**: 基于用户ID的数据分离存储
 - **跨平台支持**: Web 应用 + Electron 桌面应用
 - **文件存储**: Base64编码的本地文件存储
+- **拖拽交互**: 现代化的拖拽排序体验
 
 ## 核心功能模块
 
@@ -51,14 +59,22 @@ src/
 - 基于LocalStorage的用户会话管理
 - 每个用户独立的数据空间
 
-### 2. 待办事项管理
+### 2. 网站导航（新增）
+- **拖拽排序**: 支持网站卡片拖拽重新排序
+- **分类管理**: 多种预设分类（搜索引擎、开发工具、社交媒体等）
+- **预设网站**: 内置常用网站快速添加
+- **图标管理**: 自动获取网站图标或自定义图标
+- **网站信息**: 支持名称、URL、描述等完整信息
+- **快速访问**: 点击直接打开网站
+
+### 3. 待办事项管理
 - 创建、编辑、删除待办事项
 - 分类管理（工作、学习、生活、文档、其他）
 - **分类检索功能**: 按分类筛选待办事项
 - 完成状态切换
 - 创建时间追踪
 
-### 3. 文档管理
+### 4. 文档管理
 - **文件夹系统**: 支持创建、删除和嵌套文件夹
 - 多种文档格式上传支持（PDF、Word、Excel、文本等）
 - 文档搜索和分类筛选
@@ -67,14 +83,14 @@ src/
 - 文档下载功能
 - Base64编码存储，确保数据完整性
 
-### 4. 笔记管理
+### 5. 笔记管理
 - **Markdown支持**: 完整的Markdown语法支持
 - 笔记分类和标签管理
 - 实时预览功能
 - 笔记编辑和删除
 - 支持GitHub Flavored Markdown (GFM)
 
-### 5. 统计分析
+### 6. 统计分析
 - 待办事项完成进度
 - 分类统计分析
 - 文档类型统计
@@ -147,6 +163,21 @@ interface Note {
 }
 ```
 
+### Website 接口（新增）
+```typescript
+interface Website {
+  id: string;
+  name: string;
+  url: string;
+  icon: string;
+  category: string;
+  description?: string;
+  position: number;
+  createdAt: Date;
+  userId: string;
+}
+```
+
 ## 构建和运行
 
 ### 环境要求
@@ -199,6 +230,7 @@ npm run electron:build
 - 使用 TypeScript 接口定义 props 类型
 - 组件内部状态使用 useState Hook
 - 副作用操作使用 useEffect Hook
+- 拖拽功能使用 @dnd-kit 库实现
 
 ### 数据管理规范
 - 所有数据操作通过 storageService 统一管理
@@ -212,6 +244,12 @@ npm run electron:build
 - Office文档通过Office Online预览
 - 文本文件直接显示内容
 
+### 拖拽交互规范
+- 使用 @dnd-kit 库实现拖拽功能
+- 支持键盘和鼠标操作
+- 保持拖拽状态的一致性
+- 拖拽后立即更新位置数据
+
 ### 样式规范
 - 使用 Ant Design 主题系统
 - 自定义样式放在 App.css 或组件对应的 CSS 文件中
@@ -223,6 +261,7 @@ npm run electron:build
 - `npm run dev`: 启动开发服务器
 - `npm run build`: 构建生产版本
 - `npm run preview`: 预览构建结果
+- `npm run test`: 测试命令（当前为占位符）
 
 ### package.json 依赖
 - **生产依赖**:
@@ -231,6 +270,14 @@ npm run electron:build
   - `antd`: ^5.12.8
   - `react-markdown`: ^10.1.0
   - `remark-gfm`: ^4.0.1
+  - `@dnd-kit/core`: ^6.3.1
+  - `@dnd-kit/sortable`: ^10.0.0
+  - `@dnd-kit/utilities`: ^3.2.2
+
+- **开发依赖**:
+  - `@vitejs/plugin-react`: ^4.2.1
+  - `typescript`: ^5.3.3
+  - `vite`: ^5.0.8
 
 ### vite.config.ts 配置
 - 开发服务器端口: 5173
@@ -241,6 +288,13 @@ npm run electron:build
 - 目标: ES2020
 - 严格模式: 启用
 - JSX: react-jsx
+- 未使用变量检查: 启用
+
+### vercel.json 配置（新增）
+- 框架: Vite
+- 构建命令: npm run build
+- 输出目录: dist
+- SPA 路由支持: 所有路由重定向到 index.html
 
 ## 扩展开发
 
@@ -261,6 +315,18 @@ npm run electron:build
 2. 更新 `getContentType` 方法
 3. 在 `DocumentManager.tsx` 中添加对应的文件类型判断
 
+### 网站导航扩展
+- 支持更多网站分类
+- 添加网站图标缓存
+- 实现网站访问统计
+- 支持网站导入/导出功能
+
+### 拖拽功能扩展
+- 支持跨组件拖拽
+- 添加拖拽动画效果
+- 实现拖拽撤销功能
+- 支持批量拖拽操作
+
 ### 主题定制
 - 修改 Ant Design 主题配置
 - 在 `App.css` 中添加自定义样式
@@ -274,6 +340,13 @@ npm run electron:build
 - 类型检查: TypeScript 编译器
 
 ## 部署
+
+### Vercel 部署（推荐）
+1. 连接 GitHub 仓库到 Vercel
+2. 自动检测 Vite 框架配置
+3. 构建命令: `npm run build`
+4. 输出目录: `dist`
+5. 推送代码自动触发部署
 
 ### Web 应用部署
 1. 运行 `npm run build` 构建生产版本
@@ -297,6 +370,11 @@ npm run electron:build
 - 确保所有依赖都已正确安装
 - 检查 Vite 配置是否正确
 
+### 拖拽功能问题
+- 确保 @dnd-kit 依赖正确安装
+- 检查拖拽传感器的配置
+- 验证拖拽上下文的设置
+
 ### 文档渲染问题
 - PDF文档需要Base64编码数据
 - Office文档预览需要网络连接
@@ -306,6 +384,11 @@ npm run electron:build
 - 用户数据存储在LocalStorage中
 - 清除浏览器数据会删除用户信息
 - 密码未加密，仅适用于个人使用
+
+### Vercel 部署问题
+- 确保 vercel.json 配置正确
+- 检查 GitHub 仓库连接
+- 验证构建日志中的错误信息
 
 ### Electron 问题
 - 确保 Electron 版本与 Node.js 版本兼容
@@ -318,17 +401,24 @@ npm run electron:build
 - 定期更新 React 和 Ant Design 版本
 - 检查安全漏洞并及时修复
 - 保持构建工具版本更新
+- 关注 @dnd-kit 库的更新
 
 ### 性能优化
 - 使用 React.memo 优化组件渲染
 - 实现虚拟滚动处理大列表
 - 优化打包体积和加载速度
 - 考虑文件压缩和懒加载
+- 优化拖拽操作的性能
 
 ### 数据安全
 - 当前适用于个人使用场景
 - 敏感数据建议加密存储
 - 定期备份重要数据
+
+### 部署维护
+- 监控 Vercel 部署状态
+- 定期检查域名和 SSL 证书
+- 优化构建时间和部署速度
 
 ---
 
