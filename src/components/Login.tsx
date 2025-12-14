@@ -66,7 +66,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           width: 400,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
         }}
-        title="TodoList 文档管理系统"
+        title="NotiTool - 个人效率工具"
         bordered={false}
       >
         <Tabs defaultActiveKey="login" centered>
